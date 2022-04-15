@@ -1,0 +1,4 @@
+﻿"grosor"= 3mm'Acrilico
+"W"= 109mm
+"H"= 70mm
+"L"= 70mm
