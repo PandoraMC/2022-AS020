@@ -23,6 +23,8 @@ from package.basecomnios import *
 from package.rfssensor import *
 from package.thresholdcontroller import *
 from package.phsensor import *
+from package.rgbsensor import *
+from package.cndctsensor import *
 
 #Test without Azure IoT Edge
 isEdge = False
@@ -38,6 +40,8 @@ data_bridge    = None
 rfs = RfsSensor(name='rfsSensors',real=False)
 thc = ThresholdController(real=False)
 ph = pHSensor(name = 'pHSensor', real = False)
+cndct = cndctSensor(name = 'cndctSensor', real = False)
+rgb = RGBSensor(name = 'RGBSensor', real = False)
 
 # PROPERTY TASKS
 async def execute_property_listener(client):
@@ -76,7 +80,7 @@ async def main():
         logger.debug('DEBUG ::: Check {}'.format(hostname))
         delay = 10
         watchdog_task  = None
-        global isEdge, isReal, control_bridge, data_bridge, rfs, thc, ph
+        global isEdge, isReal, control_bridge, data_bridge, rfs, thc, ph, cndct, rgb
         
         if "IOTEDGE_IOTHUBHOSTNAME" in os.environ:
             isEdge = True
@@ -132,7 +136,7 @@ async def main():
         await client.connect()
 
         if(hostname in 'de10nano'):
-            ph = pHSensor(name='pHSensor', real=True)
+            #ph = pHSensor(name='pHSensor', real=True)
             bridges = get_nios_status(hostname)
             if ( bridges[0] is not None ) : 
                 logger.debug('DEBUG ::: The FPGA is ready!')
@@ -141,6 +145,9 @@ async def main():
                 data_bridge = bridges[1]
                 rfs = RfsSensor(name='rfsSensors',real=True,offset=0x40100)
                 thc = ThresholdController(real=True,bridge=data_bridge,offset=0x40200)
+                ph = pHSensor(name='pHSensor', real=True, offset=0x40100)
+                cndct = cndctSensor(name = 'cndctSensor', real=True, offset=0x40100)
+                rgb = RGBSensor(name = 'RGBSensor', real=True, offset=0x40100)
                 watchdog_task = asyncio.create_task(watchdog_nios(control_bridge, 1))
 
         #Send initial values to Azure 
@@ -167,8 +174,11 @@ async def main():
             while True:
                 try :
                     if(isReal) :
-                        ph_data = ph.get_telemetries()
+                        #ph_data = ph.get_telemetries()
                         rfs_data = rfs.get_telemetries(data_bridge)
+                        ph_data = ph.get_telemetries(data_bridge)
+                        cndct_data = cndct.get_telemetries(data_bridge)
+                        rgb_data = rgb.get_telemetries(data_bridge)
                     else :
                         rfs_data = {
                             'lux':thc.generate_module_dummy_value('lux'),
@@ -183,7 +193,16 @@ async def main():
                     msg = rfs.create_component_telemetry(rfs_data)
                     logger.debug(f'Sent message: {msg}')
                     await client.send_message(msg)
+
                     msg = ph.create_component_telemetry(ph_data)
+                    logger.debug(f'Sent message: {msg}')
+                    await client.send_message(msg)
+
+                    msg = ph.create_component_telemetry(cndct_data)
+                    logger.debug(f'Sent message: {msg}')
+                    await client.send_message(msg)
+
+                    msg = ph.create_component_telemetry(rgb_data)
                     logger.debug(f'Sent message: {msg}')
                     await client.send_message(msg)
                 
