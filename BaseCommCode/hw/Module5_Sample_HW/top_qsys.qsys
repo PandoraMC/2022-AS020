@@ -151,8 +151,13 @@
    internal="nios_system.rh_temp_i2c_opencores_export"
    type="conduit"
    dir="end" />
+ <interface
+   name="nios_system_spi_analog_external"
+   internal="nios_system.spi_analog_external"
+   type="conduit"
+   dir="end" />
  <interface name="reset" internal="clk_0.clk_in_reset" type="reset" dir="end" />
- <module name="clk_0" kind="clock_source" version="20.1" enabled="1">
+ <module name="clk_0" kind="clock_source" version="21.1" enabled="1">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
@@ -184,23 +189,23 @@
  </module>
  <connection
    kind="avalon"
-   version="20.1"
+   version="21.1"
    start="hps_system.shared_mem_bridge_m0"
    end="nios_system.mm_bridge_for_hps_s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection kind="clock" version="20.1" start="clk_0.clk" end="hps_system.clk" />
- <connection kind="clock" version="20.1" start="clk_0.clk" end="nios_system.clk" />
+ <connection kind="clock" version="21.1" start="clk_0.clk" end="hps_system.clk" />
+ <connection kind="clock" version="21.1" start="clk_0.clk" end="nios_system.clk" />
  <connection
    kind="reset"
-   version="20.1"
+   version="21.1"
    start="clk_0.clk_reset"
    end="hps_system.reset" />
  <connection
    kind="reset"
-   version="20.1"
+   version="21.1"
    start="clk_0.clk_reset"
    end="nios_system.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />

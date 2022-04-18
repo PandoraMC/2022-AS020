@@ -31,7 +31,7 @@ set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.1
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CSEBA6U23I7
 set_global_assignment -name TOP_LEVEL_ENTITY top
-set_global_assignment -name LAST_QUARTUS_VERSION "20.1.1 Standard Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "21.1.0 Lite Edition"
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "09:23:22  APRIL 27, 2021"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 #============================================================
@@ -570,11 +570,26 @@ set_global_assignment -name USE_DLL_FREQUENCY_FOR_DQS_DELAY_CHAIN ON
 set_global_assignment -name UNIPHY_SEQUENCER_DQS_CONFIG_ENABLE ON
 set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
 set_global_assignment -name ECO_REGENERATE_REPORT ON
+
 set_global_assignment -name QIP_FILE software_nios2/RFS_SENSOR/mem_init/meminit.qip
 set_global_assignment -name SDC_FILE top.sdc
 set_global_assignment -name VERILOG_FILE ip/edge_detect/altera_edge_detector.v
 set_global_assignment -name VERILOG_FILE ip/debounce/debounce.v
 set_global_assignment -name QIP_FILE ip/altsource_probe/hps_reset.qip
 set_global_assignment -name QIP_FILE top_qsys/synthesis/top_qsys.qip
-
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_CS_MODULES[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_CS_MODULES[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_SCLK
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_MOSI
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_MISO
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_CS_MODULES[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_CS_MODULES[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to SPI_CS_MODULES
+set_location_assignment PIN_AH12 -to SPI_SCLK
+set_location_assignment PIN_AG16 -to SPI_MOSI
+set_location_assignment PIN_AH11 -to SPI_MISO
+set_location_assignment PIN_AF17 -to SPI_CS_MODULES[0]
+set_location_assignment PIN_AE15 -to SPI_CS_MODULES[1]
+set_location_assignment PIN_AF15 -to SPI_CS_MODULES[2]
+set_location_assignment PIN_AG10 -to SPI_CS_MODULES[3]

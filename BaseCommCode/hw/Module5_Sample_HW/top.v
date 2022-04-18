@@ -106,6 +106,13 @@ module top(
     input               RH_TEMP_DRDY_n,
     inout               RH_TEMP_I2C_SCL,
     inout               RH_TEMP_I2C_SDA,
+	 
+	 //// Analog Devices SPI Interface ///
+	 input  				SPI_MISO,
+	 output 				SPI_MOSI,
+	 output 				SPI_SCLK,
+	 output [3:0]  	SPI_CS_MODULES,
+	 
     //// unused signals in this design ////
     inout 		          		BT_KEY,
     input 		          		BT_UART_RX,
@@ -276,8 +283,12 @@ top_qsys u0(
                .nios_system_rh_temp_drdy_n_external_connection_export  (RH_TEMP_DRDY_n),   //  rh_temp_drdy_n_external_connection.export
 
                .nios_system_led_pio_export                            (fpga_led_for_nios_internal),
+					
+					.nios_system_spi_analog_external_MISO							(SPI_MISO),                             //                     nios_system_spi_analog_external.MISO
+					.nios_system_spi_analog_external_MOSI							(SPI_MOSI),                             //                                                    .MOSI
+					.nios_system_spi_analog_external_SCLK							(SPI_SCLK),                             //                                                    .SCLK
+					.nios_system_spi_analog_external_SS_n							(SPI_CS_MODULES),
            );
-
 
 // Debounce logic to clean out glitches within 1ms
 debounce debounce_inst(

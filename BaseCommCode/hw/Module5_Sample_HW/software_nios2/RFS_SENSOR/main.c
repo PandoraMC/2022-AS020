@@ -23,6 +23,9 @@
  *
  */
 
+// nios2-configure-sof -d 2 ../../output_files/Module5_Sample_HW.sof
+// nios2-download -g RFS_SENSOR.elf
+
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -31,6 +34,11 @@
 #include "rh_temp.h"
 #include "shared_mem_def.h"
 #include "math.h"
+#include "altera_avalon_spi.h"
+#include "CN0397.h"
+#include "main.h"
+
+extern float lightConcentration[3];
 
 void getMotion9(float *ax, float *ay, float *az, float *gx, float *gy, float *gz, float *mx, float *my, float *mz);
 void MPU9250_Init(alt_u32 I2C_Controller_Base);
@@ -47,6 +55,9 @@ static struct {
 	float m[3][2];
 } thresh;
 
+volatile alt_u8 spiInData[10] = {0xAA};
+volatile alt_u8 spiOutData[10] = {0xFF, 0xFF, 0xFF, 0xFF};
+
 bool convert_light_lux(int light0, int light1, float *lux){
 	float condition = (float)light1/(float)light0;
 	if 			(0 < condition    && condition <= 0.50) *lux = (0.0304 * light0) - (0.062 * light0 * powf(condition,1.4));
@@ -56,6 +67,7 @@ bool convert_light_lux(int light0, int light1, float *lux){
   else *lux = 0;
 	return TRUE;
 }
+
 
 void  set_thresh( void ){
 
@@ -131,13 +143,13 @@ bool check_temp_ax9_threshold(float a[3], float g[3], float m[3]){
 	return rv;
 }
 
-#define DEBUG
+//#define DEBUG
 
 static bool g_clear_OOR_flag=true;
 
 void Sensor_Report(bool print_flag){
   	bool bPass, bPass2;
-
+	alt_8 cntTest= 0;
   	////////////////////////////////
   	// report light sensor
   	alt_u16 light0 = 0, light1 = 0;
@@ -185,6 +197,35 @@ void Sensor_Report(bool print_flag){
   	  &m[0], &m[1], &m[2] 
   	);
 
+	////////////////////////////////
+	// report pH sensor
+	float fpH = 5.5;
+	if (print_flag) {
+	
+		printf("DEVICE: %x\n", spiInData[0] >> 4);
+
+
+		printf("pH: %.3f\r\n", fpH);
+		cntTest++;
+	}
+
+	////////////////////////////////
+	// report conductivity sensor
+	float fcndct = 0.0;	//For tap water
+	if (print_flag) {
+		printf("conductivity: %.3f S\r\n", fcndct);
+	}
+
+	////////////////////////////////
+	// report RGB sensor
+	//float rgb[3] = {1.0, 2.0, 3.0};
+	if (print_flag) {
+		CN0397_SetAppData();
+		CN0397_DisplayData();
+		printf("R: %.3f lux\r\n", lightConcentration[0]);
+		printf("G: %.3f lux\r\n", lightConcentration[1]);
+		printf("B: %.3f lux\r\n", lightConcentration[2]);
+	}
 
   	////////////////////////////////
     // Check out of range, and set LED
@@ -263,6 +304,19 @@ void Sensor_Report(bool print_flag){
   	p =(unsigned *)&m[1];    IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
   	p =(unsigned *)&m[2];    IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
 
+
+	// pH
+  	offst = PH_VALUE >> 2;
+	p = (unsigned *)&fpH;	IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
+	// Conductivity
+  	offst = CNDCT_VALUE >> 2;
+	p = (unsigned *)&fcndct;	IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
+	// RGB
+  	offst = RGB_VALUE >> 2;
+	p = (unsigned *)&lightConcentration[0];	IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
+	p = (unsigned *)&lightConcentration[1];	IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
+	p = (unsigned *)&lightConcentration[2];	IOWR(NIOS_SYSTEM_SHARED_MEMORY_BASE, offst++, *p);
+
 }
 
 #define READ_COMMUNICATION_REGISTER IORD(NIOS_SYSTEM_SHARED_MEMORY_BASE, 1)
@@ -304,6 +358,9 @@ int main()
   	printf("\r\n");
 
     int loop_cnt=0;
+
+	CN0397_Init();
+
   	while(1){ // report every second
 
   		SEND_STATUS_REGISTER(loop_cnt|0x80000000);

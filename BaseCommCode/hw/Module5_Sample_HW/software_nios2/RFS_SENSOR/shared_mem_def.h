@@ -31,6 +31,11 @@
 //#define MAGNE_Y_SENSOR_VALUE   (0x130)
 //#define MAGNE_Z_SENSOR_VALUE   (0x134)
 
+#define PH_VALUE		(0x138)
+#define CNDCT_VALUE		(0x13C)
+#define RGB_VALUE		(0x140)
+
+
 // Threshold values
 #define LIGHT0_SENSOR_L_THRESH     (0x200)
 #define LIGHT1_SENSOR_L_THRESH     (0x208)
